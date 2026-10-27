@@ -101,6 +101,17 @@ jobs:
 
       - name: Run HTML Linter
         run: npx --no-install htmlhint index.html
+        
+      - name: Create Website ZIP
+        run: |
+          zip -r netflix-website.zip index.html styles.css netflixstyles.css scripts.js
+
+      - name: Upload Website Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: netflix-website
+          path: netflix-website.zip
+          retention-days: 7
 
       - name: Lint Stage Completed
         if: success()
