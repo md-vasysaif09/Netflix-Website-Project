@@ -96,11 +96,8 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Run HTML Linter
-        run: |
-          echo "Starting HTML lint checks..."
-          npx --yes htmlhint index.html
+      - name: Install HTMLHint
+        run: npm install --no-save htmlhint
 
-      - name: Lint Stage Completed
-        if: always()
-        run: echo "HTML lint check completed. Review the previous step for any issues.
+      - name: Run HTML Linter
+        run: npx --no-install htmlhint index.html
