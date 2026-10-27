@@ -117,7 +117,7 @@ jobs:
         if: success()
         run: echo "HTML linting completed successfully!"
 
-          deploy:
+  deploy:
     name: Deploy Website to AWS EC2
     runs-on: ubuntu-latest
     needs: lint
