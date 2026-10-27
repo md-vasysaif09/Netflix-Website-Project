@@ -1,0 +1,44 @@
+name: Website CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build and Test Website
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Check Website Files
+        run: |
+          echo "Checking website files..."
+
+          if [ -f index.html ]; then
+            echo "index.html found successfully!"
+          else
+            echo "Error: index.html not found!"
+            exit 1
+          fi
+
+      - name: Validate HTML File
+        run: |
+          if grep -qi "<html" index.html; then
+            echo "HTML file validation passed!"
+          else
+            echo "Error: HTML tag not found!"
+            exit 1
+          fi
+          
+      - name: Pipeline Success
+        run: echo "Website CI pipeline completed successfully!"   
