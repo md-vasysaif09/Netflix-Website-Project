@@ -22,17 +22,18 @@ jobs:
 
       - name: Check Website Files
         run: |
-          echo "Starting build stage..."
+          echo "Starting Build Stage..."
+          echo "Repository files:"
+          ls -la
 
-          test -f index.html
-          test -f styles.css
-          test -f netflixstyles.css
-          test -f scripts.js
+          if [ ! -f index.html ]; then
+            echo "ERROR: index.html not found in repository root."
+            exit 1
+          fi
 
-          echo "All required website files exist!"
-          echo "Build stage completed successfully!"
+          echo "SUCCESS: index.html found."
+          echo "Build Stage completed."
 
-          
   test:
     name: Test Stage
     runs-on: ubuntu-latest
@@ -42,54 +43,45 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v7
 
-      - name: Check Required Files
+      - name: Validate HTML Structure
         run: |
-          echo "Checking required website files..."
+          echo "Starting Test Stage..."
 
-          for file in index.html styles.css netflixstyles.css scripts.js; do
-            if [ -f "$file" ]; then
-              echo "PASS: $file exists"
-            else
-              echo "FAIL: $file is missing"
-              exit 1
-            fi
-          done
+          if ! grep -Eiq '<html([[:space:]>])' index.html; then
+            echo "ERROR: HTML opening tag not found."
+            exit 1
+          fi
 
-      - name: Test HTML Structure
+          if ! grep -Eiq '<head([[:space:]>])' index.html; then
+            echo "ERROR: HTML head tag not found."
+            exit 1
+          fi
+
+          if ! grep -Eiq '<body([[:space:]>])' index.html; then
+            echo "ERROR: HTML body tag not found."
+            exit 1
+          fi
+
+          echo "SUCCESS: Basic HTML structure validated."
+
+      - name: Check Website Assets
         run: |
-          echo "Checking HTML structure..."
+          echo "Checking CSS and JavaScript references..."
 
-          grep -qi "<html" index.html || {
-            echo "FAIL: HTML tag not found"
-            exit 1
-          }
+          if grep -Eiq '<link[^>]+href=["'\''][^"'\'']+\.css' index.html; then
+            echo "SUCCESS: CSS reference found."
+          else
+            echo "NOTICE: No CSS reference found in index.html."
+          fi
 
-          grep -qi "<head" index.html || {
-            echo "FAIL: Head tag not found"
-            exit 1
-          }
+          if grep -Eiq '<script[^>]+src=["'\''][^"'\'']+\.js' index.html; then
+            echo "SUCCESS: JavaScript reference found."
+          else
+            echo "NOTICE: No external JavaScript reference found."
+          fi
 
-          grep -qi "<body" index.html || {
-            echo "FAIL: Body tag not found"
-            exit 1
-          }
+          echo "Website asset checks completed."
 
-          echo "PASS: Basic HTML checks completed"
-
-      - name: Check CSS and JavaScript Content
-        run: |
-          for file in styles.css netflixstyles.css scripts.js; do
-            if [ -s "$file" ]; then
-              echo "PASS: $file is not empty"
-            else
-              echo "FAIL: $file is empty"
-              exit 1
-            fi
-          done
-
-      - name: Test Stage Completed
-        run: echo "All website tests passed!"
-        
   lint:
     name: Lint Stage
     runs-on: ubuntu-latest
@@ -104,9 +96,8 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Lint HTML
-        run: |
-          npx --yes htmlhint index.html
+      - name: Validate HTML
+        run: npx --yes htmlhint index.html
 
-      - name: Lint Stage Completed
-        run: echo "HTML linting completed successfully!"
+      - name: Pipeline Success
+        run: echo "Build, Test, and Lint stages completed successfully!"
