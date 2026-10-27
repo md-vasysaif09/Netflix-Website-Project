@@ -101,3 +101,7 @@ jobs:
 
       - name: Run HTML Linter
         run: npx --no-install htmlhint index.html
+
+      - name: Lint Stage Completed
+        if: success()
+        run: echo "HTML linting completed successfully!"
